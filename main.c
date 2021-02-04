@@ -1,5 +1,6 @@
 #include <stdio.h> 		// Standard IO
 #include <stdlib.h> 		// System function
+#include <string.h>		// String Length
 
 // Define functions
 unsigned int sleep(unsigned int seconds);
@@ -7,13 +8,17 @@ unsigned int sleep(unsigned int seconds);
 int main(){
 	// Define variables
 
-	int intervalLength = 70;
-	int intervalCount = 2;
+	int intervalLength = 60;
+	int intervalCount = 1;
    	
 	int i;
 	int j;
 	int minutesLeft;
 	int secondsLeft;
+	
+	char minutesLeftFormat[] = " ";
+	char secondsLeftFormat[] = " ";
+
 	char intervalRemain[BUFSIZ];
 
 	// User enters length of each interval
@@ -40,18 +45,33 @@ int main(){
 
 		// Loop through each interval time
 		for (j = intervalLength; j > 0; --j){
+			
 			secondsLeft = j;
 			minutesLeft = 0;
+
+			minutesLeftFormat[0] = '\0';
+			secondsLeftFormat[0] = '\0';
+
 			do {
 				if (secondsLeft >= 60 && minutesLeft*60 < secondsLeft){
 					minutesLeft++;
 					secondsLeft = secondsLeft - 60;
 				}
 			} while (secondsLeft > 59);
-			snprintf(intervalRemain, sizeof(intervalRemain), "figlet '%d:%d'", minutesLeft, secondsLeft);			// Parse figlet command
-			system(intervalRemain);												// Execute figlet command
+
+			// Format Numbers
+
+			if (minutesLeft <= 9){
+				minutesLeftFormat[0] = '0';
+			}
+			if (secondsLeft <= 9){
+				secondsLeftFormat[0] = '0';
+			}
+			
+			snprintf(intervalRemain, sizeof(intervalRemain), "figlet '%s%d:%s%d'", minutesLeftFormat, minutesLeft, secondsLeftFormat, secondsLeft);		// Parse figlet command
+			system(intervalRemain);																// Execute figlet command
 			sleep(1);									
-			system("clear");												// Clear console
+			system("clear");																// Clear console
 		}
 	}	
 
