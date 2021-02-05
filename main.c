@@ -41,6 +41,27 @@ int main(){
 
 	// Clear console
 	system("clear");
+	
+	// Warm Up Period
+	for (j = 10; j >= 0; --j){
+			
+			system("clear");																// Clear console
+
+			secondsLeft = j;
+
+			secondsLeftFormat[0] = '\0';
+
+			// Format Seconds
+
+			if (secondsLeft <= 9){
+				secondsLeftFormat[0] = '0';
+			}
+			
+			snprintf(intervalRemain, sizeof(intervalRemain), "figlet '00:%s%d'", secondsLeftFormat, secondsLeft);						// Parse figlet command
+			system(intervalRemain);																// Execute figlet command
+
+			sleep(1);
+	}
 
 	// Loop through each interval
 	for (i = 1; i <= intervalCount; ++i){
