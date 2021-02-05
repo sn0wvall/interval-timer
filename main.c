@@ -1,9 +1,10 @@
 #include <stdio.h> 		// Standard IO
 #include <stdlib.h> 		// System function
-#include <string.h>		// String Length
+#include <time.h>		// Clock Timing
 
 // Define functions
 unsigned int sleep(unsigned int seconds);
+int nanosleep(const struct timespec *req, struct timespec *rem);
 
 int main(){
 	// Define variables
@@ -15,6 +16,9 @@ int main(){
 	int j;
 	int minutesLeft;
 	int secondsLeft;
+
+	double formatTime;
+	int timeSleep;
 	
 	char minutesLeftFormat[] = " ";
 	char secondsLeftFormat[] = " ";
@@ -22,18 +26,16 @@ int main(){
 	char intervalRemain[BUFSIZ];
 
 	// User enters length of each interval
-	printf("Enter the length in seconds of each interval: ");
+	printf("Enter the length in seconds of each interval: \n");
 	//scanf("%s", &intervalLength);
 	// Validate Input is not over 1 hour
 	if (intervalLength > 3599){
 		return 1;
 	}
-	printf("Interval Length set to: %ds\n", intervalLength);
 	
 	// User enters number of intervals to run through
-	printf("\nEnter the count of intervals: ");
+	printf("Enter the count of intervals: \n");
 	//scanf("%s", &intervalCount);
-	printf("Interval Count set to: %d\n", intervalCount);
 	
 	// Begin intervals
 
@@ -46,6 +48,10 @@ int main(){
 		// Loop through each interval time
 		for (j = intervalLength; j > 0; --j){
 			
+			clock_t formatBegin = clock();															// Begin Timing
+
+			system("clear");																// Clear console
+
 			secondsLeft = j;
 			minutesLeft = 0;
 
@@ -70,8 +76,13 @@ int main(){
 			
 			snprintf(intervalRemain, sizeof(intervalRemain), "figlet '%s%d:%s%d'", minutesLeftFormat, minutesLeft, secondsLeftFormat, secondsLeft);		// Parse figlet command
 			system(intervalRemain);																// Execute figlet command
-			sleep(1);									
-			system("clear");																// Clear console
+
+			clock_t formatEnd = clock();															// End Timing
+			
+			formatTime = (double)(formatEnd - formatBegin) / CLOCKS_PER_SEC * 10000000;									// Adjust 1 second for CPU processing time
+			timeSleep = 1000000 - formatTime * 2;
+
+			usleep(timeSleep);
 		}
 	}	
 
