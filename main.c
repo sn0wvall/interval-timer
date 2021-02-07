@@ -11,7 +11,7 @@ int main(){
 
 	int intervalLength = 60;
 	int intervalCount = 1;
-   	
+
 	int i;
 	int j;
 	int minutesLeft;
@@ -26,17 +26,18 @@ int main(){
 	char intervalRemain[BUFSIZ];
 
 	// User enters length of each interval
-	printf("Enter the length in seconds of each interval: \n");
-	//scanf("%s", &intervalLength);
+	printf("Enter the length in seconds of each interval:");
+	scanf("%d", &intervalLength);
+
 	// Validate Input is not over 1 hour
-	if (intervalLength > 3599){
-		return 1;
-	}
+	//if (intervalLength > 3599){
+	//	return 1;
+	//}
 	
 	// User enters number of intervals to run through
-	printf("Enter the count of intervals: \n");
-	//scanf("%s", &intervalCount);
-	
+	printf("\nEnter the count of intervals:");
+	scanf("%d", &intervalCount);
+
 	// Begin intervals
 
 	// Clear console
@@ -62,6 +63,8 @@ int main(){
 
 			sleep(1);
 	}
+
+	system("aplay -q ./ding.wav &");
 
 	// Loop through each interval
 	for (i = 1; i <= intervalCount; ++i){
@@ -105,6 +108,9 @@ int main(){
 
 			usleep(timeSleep);
 		}
+
+	system("aplay -q ./ding.wav &");
+
 	}	
 
 	return 0;
