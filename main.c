@@ -1,27 +1,53 @@
 #include <stdio.h> 		// Standard IO
 #include <stdlib.h> 		// System function
 #include <time.h>		// Clock Timing
+#include <pthread.h>		// Threading
+
+// Define Threads
+
+void *timekeeper(void *args) {
+	// Loop through each interval
+	for (i = 1; i <= intervalCount; ++i){
+
+		// Loop through each interval time
+		for (j = intervalLength; j > 0; --j){
+			printf("\nintervalLength");
+			usleep(1000000);
+		}
+	}
+
+	return NULL;
+}
+
+void *presenter(void *args) {
+	return NULL;
+}
 
 // Define functions
 
 int main(){
+
 	// Define variables
 
-	int intervalLength = 5;
-	int intervalCount = 2;
+	unsigned int intervalLength = 5;
+	unsigned int intervalCount = 2;
 
-	int i;
-	int j;
-	int minutesLeft;
-	int secondsLeft;
+	register int i;
+	register int j;
+	unsigned int minutesLeft;
+	unsigned int secondsLeft;
+	
+	struct timekeeperArgs {}
+	
+	int stopwatchr;
 
 	double formatTime;
-	int timeSleep;
+	unsigned int timeSleep;
 	
-	char minutesLeftFormat[] = " ";
-	char secondsLeftFormat[] = " ";
+	unsigned char minutesLeftFormat[] = " ";
+	unsigned char secondsLeftFormat[] = " ";
 
-	char intervalRemain[BUFSIZ];
+	unsigned char intervalRemain[BUFSIZ];
 
 	// User enters length of each interval
 	//printf("Enter the length in seconds of each interval:");
@@ -37,8 +63,8 @@ int main(){
 	// Begin intervals
 
 	// Clear console
-	system("clear");
 	printf("\e[?25l");
+	//system("clear");
 	
 	// Warm Up Period
 	// for (j = 10; j >= 0; --j){
@@ -67,6 +93,13 @@ int main(){
 
 	// system("aplay -q ./ding.wav &");
 
+	// Start Timekeeper
+
+	pthread_t stopwatch;
+
+	stopwatchr = pthread_create(&stopwatch, NULL, timekeeper, timekeeperArgs);
+	pthread_join(stopwatch, NULL);
+
 	// Loop through each interval
 	for (i = 1; i <= intervalCount; ++i){
 
@@ -75,7 +108,7 @@ int main(){
 			
 			clock_t formatBegin = clock();															// Begin Timing
 
-			system("clear");																// Clear console
+			//system("clear");																// Clear console
 
 			secondsLeft = j;
 			minutesLeft = 0;
@@ -83,13 +116,12 @@ int main(){
 			minutesLeftFormat[0] = '\0';
 			secondsLeftFormat[0] = '\0';
 
-			do {
+			while (secondsLeft > 59);{
 				if (secondsLeft >= 60 && minutesLeft*60 < secondsLeft){
 					minutesLeft++;
 					secondsLeft = secondsLeft - 60;
 				}
-			} while (secondsLeft > 59);
-
+			} 
 			// Format Numbers
 
 			if (minutesLeft <= 9) { minutesLeftFormat[0] = '0'; }	
@@ -108,6 +140,8 @@ int main(){
 	system("aplay -q ./ding.wav &");
 
 	}	
+
+	//printf("\e[?25h");
 
 	return 0;
 }
