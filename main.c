@@ -1,8 +1,7 @@
 #include <stdio.h> 		// Standard IO
 #include <stdlib.h> 		// System function
-#include <time.h>		// Clock Timing
 #include <pthread.h>		// Threading
-#include <unistd.h>
+#include <unistd.h>		// usleep()
 
 int i;
 int j;
@@ -11,8 +10,9 @@ pthread_t stopwatch;										// Define Stopwatch Thread
 pthread_t crier;										// Define Crier Thread
 pthread_t ding;											// Define Ding Thread
 
-unsigned int intervalLength = 3603;
+unsigned int intervalLength = 5;
 unsigned int intervalCount = 2;
+unsigned int intervalCountTemp;
 
 unsigned char hoursLeftFormat[] = " ";
 unsigned char minutesLeftFormat[] = " ";
@@ -21,10 +21,9 @@ unsigned char secondsLeftFormat[] = " ";
 unsigned int hoursLeft;
 unsigned int minutesLeft; 
 unsigned int secondsLeft;
+unsigned int intervalsLeft;
 
 unsigned char intervalRemain[BUFSIZ];
-
-unsigned int secondsLeftOld;
 
 // Define Threads
 
@@ -39,8 +38,10 @@ void *timekeeper(void *args) {
 		}
 	}	
 
+	// Kill other threads allowing the program to exit
 	pthread_cancel(crier);
-
+	pthread_cancel(ding);
+	
 	return NULL;
 }
 
@@ -48,7 +49,8 @@ void *announcer(void *args) {
 
 	for(;;){
 		secondsLeft = j;
-		usleep(100000);
+		usleep(50000);
+		// Check Time Change
 		if (secondsLeft != j){
 			secondsLeft = j;
 			minutesLeft = j / 60;
@@ -58,6 +60,7 @@ void *announcer(void *args) {
 			minutesLeftFormat[0] = '\0';
 			secondsLeftFormat[0] = '\0';
 
+
 			if (minutesLeft != 0) {secondsLeft = secondsLeft - 60 * minutesLeft;}
 			if (hoursLeft != 0) {minutesLeft = minutesLeft - 60 * hoursLeft;}
 
@@ -66,17 +69,24 @@ void *announcer(void *args) {
 			if (secondsLeft < 10) {secondsLeftFormat[0] = '0';}
 
 			system("clear");
-	 		snprintf(intervalRemain, sizeof(intervalRemain), "figlet '%s%d:%s%d:%s%d'", hoursLeftFormat, hoursLeft, minutesLeftFormat, minutesLeft, secondsLeftFormat, secondsLeft);						// Parse figlet command
-	 		system(intervalRemain);																// Execute figlet command
+
+	 		snprintf(intervalRemain, sizeof(intervalRemain), "figlet '%s%d:%s%d:%s%d'", hoursLeftFormat, hoursLeft, minutesLeftFormat, minutesLeft, secondsLeftFormat, secondsLeft);	// Parse figlet
+	 		system(intervalRemain);																				// Execute figlet
 		}
 	}
 	return NULL;
 }
 
 void *megaphone(void *args) {
-
-	// system("aplay -q ./ding.wav &");
-
+	
+	for (;;){
+		intervalsLeft = i;
+		usleep(100000);
+		if (intervalsLeft != i){
+				system("aplay -q ./ding.wav &");
+		}
+	}
+	
 	return NULL;
 }
 
@@ -90,24 +100,21 @@ int main(){
 	int crierr;
 	int dingr;
 
-
 	// User enters length of each interval
 
-	printf("Enter the length in seconds of each interval:");
-	scanf("%d", &intervalLength);
+	//printf("Enter the length in seconds of each interval:");
+	//scanf("%d", &intervalLength);
 
 	// User enters number of intervals to run through
 	
-	printf("\nEnter the count of intervals:");
-	scanf("%d", &intervalCount);
+	//printf("\nEnter the count of intervals:");
+	//scanf("%d", &intervalCount);
 	
 	// Begin intervals
 
 	// Clear console
 	printf("\e[?25l");
 
-	// system("aplay -q ./ding.wav &");
-	
 	// Start Threads
 
 	crierr = pthread_create(&crier, NULL, announcer, NULL);						// Spawn Announcer's Crier
@@ -119,6 +126,8 @@ int main(){
 	pthread_join(stopwatch, NULL);
 	pthread_join(crier, NULL);
 	pthread_join(ding, NULL);
+
+	//system("aplay -q ./ding.wav &");
 
 	printf("\e[?25h");
 
