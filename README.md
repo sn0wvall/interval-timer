@@ -1,8 +1,13 @@
 # interval-timer
 
+*A multi-threaded, POSIX compliant, high precision interval timer for your terminal*
+
 ## Compilation
 
+### GCC
 `gcc main.c -lpthread` 
+### TCC
+`tcc main.c -lpthread`
 
 ## Syntax
 
