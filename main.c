@@ -2,17 +2,18 @@
 #include <stdlib.h> 		// System function
 #include <pthread.h>		// Threading
 #include <unistd.h>		// usleep()
+#include <string.h>		// strcmp()
 
-int i;
-int j;
+unsigned int i;
+unsigned int j;
 
 pthread_t stopwatch;										// Define Stopwatch Thread
 pthread_t crier;										// Define Crier Thread
 pthread_t ding;											// Define Ding Thread
 
-unsigned int intervalLength = 5;
-unsigned int intervalCount = 2;
-unsigned int intervalCountTemp;
+unsigned int warmupTime;
+unsigned int intervalLength;
+unsigned int intervalCount;
 
 unsigned char hoursLeftFormat[] = " ";
 unsigned char minutesLeftFormat[] = " ";
@@ -23,6 +24,7 @@ unsigned int minutesLeft;
 unsigned int secondsLeft;
 unsigned int intervalsLeft;
 
+unsigned int opt;
 unsigned char intervalRemain[BUFSIZ];
 
 // Define Threads
@@ -92,42 +94,82 @@ void *megaphone(void *args) {
 
 // Define functions
 
-int main(){
+int main(int argc, char** argv){
 
 	// Define variables
 		
 	int stopwatchr;
 	int crierr;
 	int dingr;
+  	
+	// If no arguments, exit with error
 
-	// User enters length of each interval
+	// Help Message
+	if(argc == 2 && strcmp(argv[1], "--help")==0 || strcmp(argv[1], "-h")==0) {
+		printf("HELP:\n\
+			\r--help, -h: Displays help text\n\
+			\r--version, -v: Displays version\n\
+			\r--warmup, -w: Set Warmup Time\n\
+			\rSYNTAX:\n\
+			\rcommand [flags] [interval length][interval count]\n");
+		return 0;
+	}
 
-	//printf("Enter the length in seconds of each interval:");
-	//scanf("%d", &intervalLength);
+	if(argc == 2 && strcmp(argv[1], "--version")==0 || strcmp(argv[1], "-v")==0) {
+		printf("1.0\n");
+		return 0;
+	}
+  	
+	// Process flags
+	while((opt = getopt(argc, argv, "w:")) != -1)  
+ 	{  
+        	switch(opt)  
+        	{  
+            		case 'w':  
+				warmupTime = atoi(optarg);
+                		break;  
+            		case ':':  
+                		printf("option needs a value\n");  
+				break;
+            		case '?':  
+                		printf("unknown option: %c\n", optopt); 
+                		break;  
+        	}  
+    	}  
 
-	// User enters number of intervals to run through
-	
-	//printf("\nEnter the count of intervals:");
-	//scanf("%d", &intervalCount);
-	
 	// Begin intervals
+	
+	// Check Length and Count Arguments are present
+
+	if (argc - optind < 2){printf("Please include an interval length and count in your command; see --help for more.\n"); return 2;}
+
+	// Extract Length and Count from remaining arguments	
+
+	intervalLength = atoi(argv[optind]);
+	intervalCount = atoi(argv[optind + 1]);
 
 	// Clear console
 	printf("\e[?25l");
 
-	// Start Threads
-
+	// Start Output Threads
 	crierr = pthread_create(&crier, NULL, announcer, NULL);						// Spawn Announcer's Crier
-	stopwatchr = pthread_create(&stopwatch, NULL, timekeeper, NULL);				// Spawn Timekeeper's Stopwatch
 	dingr = pthread_create(&ding, NULL, megaphone, NULL);						// Spawn Megaphone's Ding
+	
+	// Warmup Period
+
+	for (j = warmupTime; j > 0; --j){
+		usleep(1000000);
+	}
+
+	// Start Timekeeper
+
+	stopwatchr = pthread_create(&stopwatch, NULL, timekeeper, NULL);				// Spawn Timekeeper's Stopwatch
 
 	// Wait for all threads to finish
 
 	pthread_join(stopwatch, NULL);
 	pthread_join(crier, NULL);
 	pthread_join(ding, NULL);
-
-	//system("aplay -q ./ding.wav &");
 
 	printf("\e[?25h");
 
